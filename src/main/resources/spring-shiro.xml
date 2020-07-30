@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+    <bean id="roleOrFilter" class="com.superkin.tcams.common.shiro.CustomRolesAuthorizationFilter"></bean>
+
+    <!-- 启用shrio授权注解拦截方式 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- 装配 securityManager -->
+        <property name="securityManager" ref="securityManager"/>
+        <!-- 配置登陆页面 -->
+        <property name="loginUrl" value="/member/tologin"/>
+        <!-- 登陆成功后的一面 -->
+        <property name="successUrl" value="/"/>
+        <property name="unauthorizedUrl" value="/member/unauthorized"/>
+        <!-- 具体配置需要拦截哪些 URL, 以及访问对应的 URL 时使用 Shiro 的什么 Filter 进行拦截.  -->
+        <property name="filters">
+            <map>
+                <entry key="roleOrFilter" value-ref="roleOrFilter"/>
+            </map>
+        </property>
+        <property name="filterChainDefinitions">
+            <value>
+                /member/tologin=anon
+                /member/login=anon
+                /member/unauthorized=anon
+                /11112/**=anon
+                /js/**=anon
+                /css/**=anon
+                /fonts/**=anon
+                /images/**=anon
+                /img/**=anon
+                /ueditor/**=anon
+                /**/*JSON=anon
+
+                /member/logout = logout
+              <!--  /**/*JSON==authc,roleOrFilter["system,programmer,projectManager"]
+                /**/*JSON*=authc,roleOrFilter["system,programmer,projectManager"]
+                /system/**= authc,roleOrFilter[system]
+                /administration/**= authc,roleOrFilter["system,administration"]
+                /hr/**=authc,roleOrFilter["system,hr"]
+                /financing/**=authc,roleOrFilter["system,financing"]
+                /programmer/**=authc,roleOrFilter["system,programmer,projectManager"]
+                /projectManager/**=authc,roleOrFilter["system,projectManager"]
+                system  chairman minister  financing  member
+                -->
+                /member/tosave=authc,roleOrFilter["system,chairman,minister"]
+                /activity/tosave=authc,roleOrFilter["system,chairman"]
+                /activity/toupdate=authc,roleOrFilter["system,chairman"]
+                /activity/remove=authc,roleOrFilter["system,chairman"]
+                /deptActivity/save=authc,roleOrFilter["system,chairman,minister"]
+                /financing/toapprove=authc,roleOrFilter["system,chairman,financing"]
+                /notice/save=authc,roleOrFilter["system,chairman"]
+
+                /** = authc
+            </value>
+        </property>
+    </bean>
+
+
+    <!-- 配置 Shiro 的 SecurityManager Bean. -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="shiroDbRealm"/>
+        <property name="sessionMode" value="native">
+        </property>
+    </bean>
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+</beans>
+
